@@ -1,130 +1,92 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_URL = "https://jsonplaceholder.typicode.com/users";
+
 const Problem2 = () => {
-    const [recordlist, setRecordList] = useState([]);
-   //const [recordobj, setRecordobj] = useState[{}]
-    //"name":""
-    // "height": "",
-    // "mass": "",
-    // "hair_color": "",
-    // "skin_color": "",
-    // "eye_color": "",
-    // "birth_year": "",
-    // "gender": "",
-    // "homeworld": "",
-    // "films": [
-    //     "",
-    //     "",
-    //     "",
-    //     ""
-    // ],
-    // "species": [],
-    // "vehicles": [
-    //     "https://swapi.dev/api/vehicles/14/",
-    //     "https://swapi.dev/api/vehicles/30/"
-    // ],
-    // "starships": [
-    //     "https://swapi.dev/api/starships/12/",
-    //     "https://swapi.dev/api/starships/22/"
-    // ],
-    // "created": new Date(),
-    // "edited": new Date(),
-    // "url": ""
-   
+    const [records, setRecords] = useState([]);
 
     useEffect(() => {
         getRecords();
-    }, [])
+    }, []);
 
-    const AddRecord = async () => {
-        const response = await axios
-            .post("https://swapi.dev/api/people/1");
-        if (response) {
-            alert("Record Added successfully");
-        } else {
-            alert("error on adding record");
-        }
-    }
-
+ 
     const getRecords = async () => {
-        const response = await axios
-            .get("https://swapi.dev/api/people/1")
-        setRecordList(response.data);
-    }
-
-    const onDelete = async () => {
-        const response = await axios.delete("");
-        if (response) {
-            alert("Record deleted successfully");
-        } else {
-            alert("error on deleting record");
+        try {
+            const response = await axios.get(API_URL);
+            setRecords(response.data.slice(0, 5)); 
+        } catch (error) {
+            console.error("Error fetching data:", error);
         }
-    }
+    };
 
-    const onEdit = (data) => {
-     // setRecordobj(data)
-    }
+    
+    const addRecord = async () => {
+        try {
+            const newRecord = { name: "New User", email: "newuser@example.com" };
+            const response = await axios.post(API_URL, newRecord);
+            setRecords([...records, response.data]);
+            alert("Record added successfully!");
+        } catch (error) {
+            console.error("Error adding record:", error);
+        }
+    };
+
+ 
+    const deleteRecord = async (id) => {
+        try {
+            await axios.delete(`${API_URL}/${id}`);
+            setRecords(records.filter(record => record.id !== id));
+            alert("Record deleted successfully!");
+        } catch (error) {
+            console.error("Error deleting record:", error);
+        }
+    };
 
     return (
         <div>
-            <button className='btn btn-primary' onClick={() => getRecords()}>Get Record</button>
-            <button className='btn btn-primary' onClick={() => AddRecord()}>Add Record</button>
-            {JSON.stringify(recordlist)}
+            <button className='btn btn-primary' onClick={getRecords}>Refresh Records</button>
+            <button className='btn btn-success' onClick={addRecord}>Add Record</button>
+            
             <div className='card'>
-                <div className='row'>
-                <div className='col-8'>
-                    <div className='card-header'>
-                        <h2>Record List</h2>
-                    </div>
-                    <div className='card-body'>
-                        <table>
-                            <thead>
+                <div className='card-header'>
+                    <h2>Record List</h2>
+                </div>
+                <div className='card-body'>
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {records.length > 0 ? (
+                                records.map((record) => (
+                                    <tr key={record.id}>
+                                        <td>{record.id}</td>
+                                        <td>{record.name}</td>
+                                        <td>{record.email}</td>
+                                        <td>
+                                            <button className='btn btn-danger' onClick={() => deleteRecord(record.id)}>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
                                 <tr>
-                                    <th>Id</th>
-                                    <th>RecordName</th>
-                                    <th>Action</th>
+                                    <td colSpan="4">No records found</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                
-                                {
-                                    recordlist?.map((record,index)=>{
-                                        return(<tr>
-                                            <td>{record.name}</td>
-                                        </tr>)
-                                    })
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-                <div className='col-4'>
-
-                </div>
-                </div>
-                <div className='row'>
-                    <div className='col-8'>
-                    <div className='card-header'>
-                    <h2>Add Record</h2>
-                    </div>
-                    </div>
-                  <div className='col-4'>
-                  <div className='card-body'>
-                    <h3>Record Form</h3>
-                    <div>
-                  </div>
-                  
-                        <label></label>
-                        <input/>
-                    </div>
-                    </div>
-                </div>
-             
-
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Problem2
+export default Problem2;
